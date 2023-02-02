@@ -129,7 +129,6 @@ AC_ARG_WITH([ffmpeg-options],
   [ffmpeg_options=$withval],
   [ffmpeg_options=default])
 
-
 if test "$use_ccache" = "yes"; then
   AC_CHECK_PROG(HAVE_CCACHE,ccache,"yes","no",)
   if test "x$HAVE_CCACHE" = "xno" ; then
@@ -380,7 +379,9 @@ case $host in
     platform_cxxflags="$platform_cflags"
     platform_os="linux"
     meson_system="linux"
-    target_platform="wayland gbm"
+    if test "$use_platform" = "webos"; then
+      target_platform=webos
+    fi
   ;;
   *i686*-linux-gnu*|i*86*-*-linux-uclibc*|x86_64*-linux-gnu*|x86_64-*-linux-uclibc*)
     case $host in
@@ -399,7 +400,6 @@ case $host in
     platform_os="linux"
     meson_system="linux"
     ffmpeg_options_default="--enable-vaapi --enable-vdpau --cpu=$use_cpu"
-    target_platform="x11 wayland gbm"
   ;;
   *darwin*)
     # darwin builds are always cross
@@ -504,6 +504,8 @@ esac
 case $use_platform in
   ios|tvos|macos)
     ;;
+  webos)
+    ;;
   auto)
     ;;
   *)
@@ -522,7 +524,7 @@ case $build in
     fi
 esac
 
-if test "$platform_os" = "android"; then
+if test "$platform_os" = "android" || test "$use_platform" = "webos"; then
   need_libiconv=1
 else
   AC_SEARCH_LIBS([iconv_open],iconv, link_iconv=$ac_cv_search_iconv_open, link_iconv=-liconv; AC_MSG_WARN("No iconv support in toolchain. Will build libiconv."); need_libiconv=1)
@@ -846,6 +848,7 @@ echo -e "CXX:\t\t $CXX"
 echo -e "cflags:\t\t $platform_cflags"
 echo -e "cxxflags:\t\t $platform_cxxflags"
 echo -e "ldflags:\t\t $platform_ldflags"
+echo -e "target_platform:\t $target_platform"
 echo -e "platform_includes:\t $platform_includes"
 echo -e "ffmpeg options:\t $ffmpeg_options"
 echo -e "prefix:\t\t $prefix"

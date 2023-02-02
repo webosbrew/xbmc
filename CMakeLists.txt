@@ -212,6 +212,7 @@ set(optional_deps Alsa
                   Sndio
                   UDEV
                   Udfread
+                  WaylandProtocolsWebOS
                   XSLT
                   ${PLATFORM_OPTIONAL_DEPS})
 

@@ -1,0 +1,5 @@
+LIBNAME=webos-wayland-extensions
+BASE_URL=https://github.com/webosose/webos-wayland-extensions
+VERSION=43
+ARCHIVE=$(LIBNAME)-$(VERSION).tar.gz
+SHA512=5f89d2ef9dbfcb952900e691871da704e6ca9169a531bf308354800d6ee6395dcee33d1961df2861f3646f849ce92b38f352663475cab7512134dd3a91373181
