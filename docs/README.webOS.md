@@ -18,7 +18,8 @@ This guide has been tested with an adapted buildroot configuration where the Lin
 8. **[Build](#8-build)**  
   8.1. **[Build kodi binary](#81-Build-kodi-binary)**
 9. **[Packaging kodi to distribute as an IPK](#9-Packaging-kodi-to-distribute-as-an-IPK)**  
-  9.1. **[Create the IPK](#91-Create-the-IPK)**  
+  9.1. **[Add missing libraries to your IPK](#91-Add-missing-libraries-to-your-IPK)**  
+  9.2. **[Create the IPK](#92-Create-the-IPK)**  
 10. **[Install](#10-Install)**  
   10.1. **[Using ares-cli to install](#101-Using-ares-cli-to-install)**  
 11. **[Debugging ](#11-Debugging)**
