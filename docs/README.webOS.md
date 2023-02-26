@@ -65,41 +65,17 @@ Several different strategies are used to draw your attention to certain pieces o
 * **[Download ares CLI tools](https://webostv.developer.lge.com/develop/tools/cli-installation)**. These are required to package the kodi binary into a IPK format that webOS understands.
 * **[Download and setup a compatible toolchain to compile kodi]**. Suitable toolchains can be found on the LG OpenSource website: **https://opensource.lge.com/**. You will need to enter the model number of your TV. Another toolchain which we actually used in this guide is **[buildroot-nc4](https://github.com/openlgtv/buildroot-nc4)** which may be more suitable as it comes with newer tools such as GCC 12.2.0.
 
-* Device with **webOS 7.0 or newer**.
-
 Team Kodi CI infrastructure is limited, and therefore we only have the single combination tested. Newer webOS versions may work, however the team does not actively test/use these versions, so use with caution. Earlier versions may work, however we dont actively support them, so use with caution.
+
+Download and extract the latest [buildroot-nc4](https://github.com/openlgtv/buildroot-nc4/releases) toolchain
 
 **[back to top](#table-of-contents)**
 
 ## 3. Configure the tool chain
 
-Assuming you are using builroot-nc4 there will be some changes that need to be made. The default buildroot-nc4 is setup to build with very old devices, bumping the glibc version and kernel is recommended as so:
-
-Edit configs/webos_tv_defconfig
+After extracting, you will need to add the toolchain to your PATH so that it can be found:
 ```
-change BR2_DEFAULT_KERNEL_VERSION to a more recent version that matches your device e.g. 5.4.96
-```
-
-Edit package/glibc/glibc.mk
-```
-change GLIBC_VERSION to one that matches the version on your device, for example 2.31
-```
-
-You will also need to add a sha256 hash for whatever glibc version you end up using:
-```
-sha256  bcc5496be806fba7c0122201b2e246b02170dfd791ad6ac90bf3a52e9b2e27d4  glibc-2.31.tar.gz
-```
-
-After we have finished setting up the tool chain we now need to compile it:
-
-```
-make webos_tv_defconfig
-make -j$(getconf _NPROCESSORS_ONLN)
-```
-
-After compilation, you will need to add the toolchain to your PATH so that it can be found:
-```
-export SDK_PATH="/home/developer/buildroot-nc4/output/host"
+export SDK_PATH="/path/to/arm-webos-linux-gnueabi_sdk-buildroot"
 export "PATH=$PATH:$SDK_PATH/bin:$SDK_PATH/sbin"
 ```
 
@@ -159,6 +135,11 @@ Build tools and dependencies:
 ```
 make -j$(getconf _NPROCESSORS_ONLN)
 ```
+
+Build flatbuffers:
+````
+make -C native/flatbuffers
+````
 
 **TIP:** By adding `-j<number>` to the make command, you can choose how many concurrent jobs will be used and expedite the build process. It is recommended to use `-j$(getconf _NPROCESSORS_ONLN)` to compile on all available processor cores. The build machine can also be configured to do this automatically by adding `export MAKEFLAGS="-j$(getconf _NPROCESSORS_ONLN)"` to your shell config (e.g. `~/.bashrc`).
 
