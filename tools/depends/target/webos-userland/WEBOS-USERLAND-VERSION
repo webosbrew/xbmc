@@ -1,0 +1,5 @@
+LIBNAME=webos-userland
+BASE_URL=https://github.com/sundermann/webos-userland
+VERSION=0.0.2
+ARCHIVE=$(LIBNAME)-$(VERSION).tar.gz
+SHA512=69a90ab13a429a99881a12dbceb007cb752b3120cef399ff323356614b937b109f2728827f3ada4502f0e76ac24c5bd4a44f71842f3bf6422e87e6aae17ff956
