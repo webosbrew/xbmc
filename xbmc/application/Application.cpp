@@ -346,6 +346,10 @@ bool CApplication::Create()
 {
   m_bStop = false;
 
+#ifdef WAYLANDPROTOCOLSWEBOS_FOUND
+  SetupWebOSIpkEnvironment();
+#endif
+
   RegisterSettings();
 
   CServiceBroker::RegisterCPUInfo(CCPUInfo::GetCPUInfo());
@@ -3679,3 +3683,20 @@ void CApplication::CloseNetworkShares()
   for (const auto& vfsAddon : CServiceBroker::GetVFSAddonCache().GetAddonInstances())
     vfsAddon->DisconnectAll();
 }
+
+#ifdef WAYLANDPROTOCOLSWEBOS_FOUND
+void CApplication::SetupWebOSIpkEnvironment()
+{
+  /*
+   * WebOS ipks run in a chroot like environment. $HOME is set to the ipk dir and $LD_LIBRARY_PATH is lib
+   */
+  auto HOME = std::string(getenv("HOME"));
+  CEnvironment::setenv("XDG_RUNTIME_DIR", "/tmp/xdg", 1);
+  CEnvironment::setenv("XKB_CONFIG_ROOT", "/usr/share/X11/xkb", 1);
+  CEnvironment::setenv("WAYLAND_DISPLAY", "wayland-0", 1);
+  CEnvironment::setenv("PYTHONHOME", HOME + "/lib/python3.11", 1);
+  CEnvironment::setenv("PYTHONPATH", HOME + "/lib/python3.11", 1);
+  CEnvironment::setenv("PYTHONIOENCODING", "UTF-8", 1);
+  CEnvironment::setenv("KODI_HOME", HOME, 1);
+}
+#endif

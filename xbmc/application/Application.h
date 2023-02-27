@@ -243,6 +243,9 @@ public:
 private:
   void PrintStartupLog();
   void ResetCurrentItem();
+#ifdef WAYLANDPROTOCOLSWEBOS_FOUND
+  void SetupWebOSIpkEnvironment();
+#endif
 
   mutable CCriticalSection m_critSection; /*!< critical section for all changes to this class, except for changes to triggers */
 
