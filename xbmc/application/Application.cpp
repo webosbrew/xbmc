@@ -3698,5 +3698,6 @@ void CApplication::SetupWebOSIpkEnvironment()
   CEnvironment::setenv("PYTHONPATH", HOME + "/lib/python3.11", 1);
   CEnvironment::setenv("PYTHONIOENCODING", "UTF-8", 1);
   CEnvironment::setenv("KODI_HOME", HOME, 1);
+  CEnvironment::setenv("SSL_CERT_FILE", CSpecialProtocol::TranslatePath("special://xbmc/system/certs/cacert.pem").c_str(), 1);
 }
 #endif
