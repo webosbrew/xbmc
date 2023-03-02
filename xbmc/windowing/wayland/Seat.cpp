@@ -136,7 +136,10 @@ void CSeat::SetCursor(std::uint32_t serial, wayland::surface_t const &surface, s
 {
   if (m_pointer)
   {
+    // set_cursor on webOS completely breaks pointer input
+#ifndef TARGET_WEBOS
     m_pointer.set_cursor(serial, surface, hotspotX, hotspotY);
+#endif
   }
 }
 
@@ -165,8 +168,7 @@ void CSeat::HandleKeyboardCapability()
       handler->OnKeyboardLeave(this, serial, surface);
     }
   };
-  m_keyboard.on_key() = [this](std::uint32_t serial, std::uint32_t time, std::uint32_t key, wayland::keyboard_key_state state)
-  {
+  m_keyboard.on_key() = [this](std::uint32_t serial, std::uint32_t time, std::uint32_t key, wayland::keyboard_key_state state) {
     for (auto handler : m_rawKeyboardHandlers)
     {
       handler->OnKeyboardKey(this, serial, time, key, state);
