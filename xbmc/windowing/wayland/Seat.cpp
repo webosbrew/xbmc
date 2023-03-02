@@ -136,7 +136,10 @@ void CSeat::SetCursor(std::uint32_t serial, wayland::surface_t const &surface, s
 {
   if (m_pointer)
   {
+    // set_cursor on webOS completely breaks pointer input
+#ifndef WAYLANDPROTOCOLSWEBOS_FOUND
     m_pointer.set_cursor(serial, surface, hotspotX, hotspotY);
+#endif
   }
 }
 
@@ -167,6 +170,13 @@ void CSeat::HandleKeyboardCapability()
   };
   m_keyboard.on_key() = [this](std::uint32_t serial, std::uint32_t time, std::uint32_t key, wayland::keyboard_key_state state)
   {
+      CLog::Log(LOGINFO, "key: {}, state: {}", key, (int)state);
+#ifdef WAYLANDPROTOCOLSWEBOS_FOUND
+      // Ignore webOS cursor show/hide mock keycodes
+      if (key == 1199 || key == 1198) {
+          return;
+      }
+#endif
     for (auto handler : m_rawKeyboardHandlers)
     {
       handler->OnKeyboardKey(this, serial, time, key, state);
