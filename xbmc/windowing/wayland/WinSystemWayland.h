@@ -32,6 +32,10 @@
 #include <wayland-cursor.hpp>
 #include <wayland-extra-protocols.hpp>
 
+#ifdef WAYLANDPROTOCOLSWEBOS_FOUND
+#include <wayland-webos-protocols.hpp>
+#endif
+
 class IDispResource;
 
 namespace KODI
@@ -93,6 +97,11 @@ public:
 
   // winevents override
   bool MessagePump() override;
+
+#ifdef WAYLANDPROTOCOLSWEBOS_FOUND
+  std::string GetExportedWindowName();
+  bool SetExportedWindow(int32_t srcWidth, int32_t srcHeight, int32_t dstWidth, int32_t dstHeight);
+#endif
 
 protected:
   std::unique_ptr<KODI::WINDOWING::IOSScreenSaver> GetOSScreenSaverImpl() override;
@@ -195,6 +204,14 @@ private:
   wayland::presentation_t m_presentation;
 
   std::unique_ptr<IShellSurface> m_shellSurface;
+
+#ifdef WAYLANDPROTOCOLSWEBOS_FOUND
+  // WebOS foreign surface
+  std::string m_exported_window_name;
+  wayland::surface_t m_foreign_surface;
+  wayland::webos_exported_t m_exported_surface;
+  wayland::webos_foreign_t m_webos_foreign;
+#endif
 
   // Frame callback handling
   // -----------------------
