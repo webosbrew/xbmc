@@ -62,6 +62,10 @@ CWinSystemWaylandWebOS::~CWinSystemWaylandWebOS() noexcept
   }
   m_registry.reset();
 }
+bool CWinSystemWaylandWebOS::HasCursor()
+{
+  return false;
+}
 
 std::string CWinSystemWaylandWebOS::GetExportedWindowName()
 {
