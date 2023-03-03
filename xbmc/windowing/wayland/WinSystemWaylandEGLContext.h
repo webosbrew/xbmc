@@ -9,6 +9,9 @@
 #pragma once
 
 #include "WinSystemWayland.h"
+#ifdef TARGET_WEBOS
+#include "WinSystemWaylandWebOS.h"
+#endif
 #include "utils/EGLUtils.h"
 #include "windowing/linux/WinSystemEGL.h"
 
@@ -22,7 +25,11 @@ namespace WAYLAND
 {
 
 class CWinSystemWaylandEGLContext : public KODI::WINDOWING::LINUX::CWinSystemEGL,
+#ifdef TARGET_WEBOS
+                                    public CWinSystemWaylandWebOS
+#else
                                     public CWinSystemWayland
+#endif
 {
 public:
   CWinSystemWaylandEGLContext();

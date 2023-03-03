@@ -27,8 +27,11 @@ bool CWinSystemWaylandEGLContext::InitWindowSystemEGL(EGLint renderableType, EGL
 {
   VIDEOPLAYER::CRendererFactory::ClearRenderer();
   CDVDFactoryCodec::ClearHWAccels();
-
+#ifdef TARGET_WEBOS
+  if (!CWinSystemWaylandWebOS::InitWindowSystem())
+#else
   if (!CWinSystemWayland::InitWindowSystem())
+#endif
   {
     return false;
   }
@@ -55,7 +58,11 @@ bool CWinSystemWaylandEGLContext::CreateNewWindow(const std::string& name,
                                                   bool fullScreen,
                                                   RESOLUTION_INFO& res)
 {
+#ifdef TARGET_WEBOS
+  if (!CWinSystemWaylandWebOS::CreateNewWindow(name, fullScreen, res))
+#else
   if (!CWinSystemWayland::CreateNewWindow(name, fullScreen, res))
+#endif
   {
     return false;
   }
@@ -92,15 +99,21 @@ bool CWinSystemWaylandEGLContext::DestroyWindow()
 {
   m_eglContext.DestroySurface();
   m_nativeWindow = {};
-
+#ifdef TARGET_WEBOS
+  return CWinSystemWaylandWebOS::DestroyWindow();
+#else
   return CWinSystemWayland::DestroyWindow();
+#endif
 }
 
 bool CWinSystemWaylandEGLContext::DestroyWindowSystem()
 {
   m_eglContext.Destroy();
-
+#ifdef TARGET_WEBOS
+  return CWinSystemWaylandWebOS::DestroyWindowSystem();
+#else
   return CWinSystemWayland::DestroyWindowSystem();
+#endif
 }
 
 CSizeInt CWinSystemWaylandEGLContext::GetNativeWindowAttachedSize()
