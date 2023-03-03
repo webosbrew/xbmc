@@ -142,6 +142,8 @@ constexpr const char* CSettings::SETTING_VIDEOPLAYER_RENDERMETHOD;
 constexpr const char* CSettings::SETTING_VIDEOPLAYER_HQSCALERS;
 constexpr const char* CSettings::SETTING_VIDEOPLAYER_USEMEDIACODEC;
 constexpr const char* CSettings::SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE;
+constexpr const char* CSettings::SETTING_VIDEOPLAYER_USESTARFISH;
+constexpr const char* CSettings::SETTING_VIDEOPLAYER_USESTARFISHSURFACE;
 constexpr const char* CSettings::SETTING_VIDEOPLAYER_USEVDPAU;
 constexpr const char* CSettings::SETTING_VIDEOPLAYER_USEVDPAUMIXER;
 constexpr const char* CSettings::SETTING_VIDEOPLAYER_USEVDPAUMPEG2;

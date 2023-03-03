@@ -131,6 +131,24 @@
           </updates>
           <control type="toggle" />
         </setting>
+        <setting id="videoplayer.usestarfishsurface" type="boolean" label="13440" help="36544">
+          <requirement>HAS_STARFISH</requirement>
+          <level>2</level>
+          <default>true</default>
+          <updates>
+            <update type="change" />
+          </updates>
+          <control type="toggle" />
+        </setting>
+        <setting id="videoplayer.usestarfish" type="boolean" label="13439" help="36544">
+          <requirement>HAS_STARFISH</requirement>
+          <level>2</level>
+          <default>true</default>
+          <updates>
+            <update type="change" />
+          </updates>
+          <control type="toggle" />
+        </setting>
         <setting id="videoplayer.usedxva2" type="boolean" label="13427" help="36158">
           <requirement>HasDXVA2</requirement>
           <level>2</level>

@@ -30,6 +30,7 @@ $(PLATFORM): $(DEPS) | $(TARBALLS_LOCATION)/$(ARCHIVE).$(HASH_TYPE)
 
 	mkdir -p $(PREFIX)/share/wayland-webos
 	cp $(PLATFORM)/protocol/webos-shell.xml $(PREFIX)/share/wayland-webos
+	cp $(PLATFORM)/protocol/webos-foreign.xml $(PREFIX)/share/wayland-webos
 	touch $@
 
 clean:
