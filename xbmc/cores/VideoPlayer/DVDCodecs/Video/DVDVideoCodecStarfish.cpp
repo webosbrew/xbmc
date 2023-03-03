@@ -24,7 +24,7 @@
 #include "utils/CPUInfo.h"
 #include "utils/TimeUtils.h"
 #include "utils/log.h"
-#include "windowing/wayland/WinSystemWayland.h"
+#include "windowing/wayland/WinSystemWaylandWebOS.h"
 
 #include <cassert>
 #include <memory>
@@ -227,7 +227,7 @@ bool CDVDVideoCodecStarfish::Open(CDVDStreamInfo &hints, CDVDCodecOptions &optio
 
   m_starfishMediaAPI->notifyForeground();
 
-  exportedWindowName = dynamic_cast<KODI::WINDOWING::WAYLAND::CWinSystemWayland*>(CServiceBroker::GetWinSystem())
+  exportedWindowName = dynamic_cast<KODI::WINDOWING::WAYLAND::CWinSystemWaylandWebOS*>(CServiceBroker::GetWinSystem())
                            ->GetExportedWindowName();
 
   payloadArg["mediaTransportType"] = "BUFFERSTREAM";
@@ -261,7 +261,7 @@ bool CDVDVideoCodecStarfish::Open(CDVDStreamInfo &hints, CDVDCodecOptions &optio
     goto FAIL;
   }
 
-  dynamic_cast<KODI::WINDOWING::WAYLAND::CWinSystemWayland*>(CServiceBroker::GetWinSystem())
+  dynamic_cast<KODI::WINDOWING::WAYLAND::CWinSystemWaylandWebOS*>(CServiceBroker::GetWinSystem())
       ->SetExportedWindow(m_hints.width, m_hints.height, 1920, 1080);
 
   SetHDR();
