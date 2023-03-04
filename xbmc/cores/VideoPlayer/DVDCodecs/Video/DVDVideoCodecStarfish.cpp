@@ -358,10 +358,13 @@ bool CDVDVideoCodecStarfish::AddData(const DemuxPacket &packet)
 
   if (pData && iSize)
   {
-    char payload[256];
-    snprintf(payload, sizeof(payload), R"({"bufferAddr":"%p","bufferSize":%u,"pts":%llu,"esData":%d})",
-             pData, iSize, DVD_TIME_TO_MSEC(pts) * 1000000, 1);
-    auto result = m_starfishMediaAPI->Feed(payload);
+    nlohmann::json payload;
+    payload["bufferAddr"] = fmt::format("{}", fmt::ptr(pData));
+    payload["bufferSize"] = iSize;
+    payload["pts"] = DVD_TIME_TO_MSEC(pts) * 1000000;
+    payload["esData"] = 1;
+
+    auto result = m_starfishMediaAPI->Feed(payload.dump().c_str());
     CLog::Log(LOGDEBUG, "Result: {}", result);
     std::size_t found = result.find(std::string("Ok"));
     if (found == std::string::npos) {
