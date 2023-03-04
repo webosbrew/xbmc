@@ -351,7 +351,8 @@ bool CDVDVideoCodecStarfish::AddData(const DemuxPacket &packet)
 
   if (m_state == STARFISH_STATE_FLUSHED)
   {
-    //m_starfishMediaAPI->Seek(std::to_string(DVD_TIME_TO_MSEC(pts)).c_str());
+    if (pts > 0)
+      m_starfishMediaAPI->Seek(std::to_string(DVD_TIME_TO_MSEC(pts)).c_str());
     m_state = STARFISH_STATE_RUNNING;
   }
 
@@ -494,6 +495,15 @@ void CDVDVideoCodecStarfish::SetCodecControl(int flags)
   {
     CLog::Log(LOGDEBUG, LOGVIDEO, "CDVDVideoCodecStarfish::{} {:x}->{:x}", __func__,
               m_codecControlFlags, flags);
+
+    if((flags & DVD_CODEC_CTRL_DRAIN) && !(m_codecControlFlags & DVD_CODEC_CTRL_DRAIN)) {
+      m_starfishMediaAPI->Pause();
+    }
+
+    if(!(flags & DVD_CODEC_CTRL_DRAIN) && (m_codecControlFlags & DVD_CODEC_CTRL_DRAIN)) {
+      m_starfishMediaAPI->Play();
+    }
+
     m_codecControlFlags = flags;
   }
 }
