@@ -244,9 +244,23 @@ bool CDVDVideoCodecStarfish::Open(CDVDStreamInfo &hints, CDVDCodecOptions &optio
   payloadArg["option"]["externalStreamingInfo"]["contents"]["esInfo"]["videoFpsValue"] = m_hints.fpsrate;
   payloadArg["option"]["externalStreamingInfo"]["contents"]["esInfo"]["videoFpsScale"] = m_hints.fpsscale;
   payloadArg["option"]["externalStreamingInfo"]["contents"]["format"] = "RAW";
-  payloadArg["option"]["transmission"]["contentsType"] = "LIVE";
+  payloadArg["option"]["transmission"]["contentsType"] = "LIVE"; // "LIVE", "WebRTC"
   payloadArg["option"]["needAudio"] = false;
   payloadArg["option"]["seekMode"] = "late_Iframe";
+  payloadArg["option"]["lowDelayMode"] = true;
+
+  payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["preBufferByte"] = 0;
+  payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["bufferMinLevel"] = 0;
+  payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["bufferMaxLevel"] = 0;
+  payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["qBufferLevelVideo"] = 1048576;
+  payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["srcBufferLevelVideo"]["minimum"] = 1048576;
+  payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["srcBufferLevelVideo"]["maximum"] = 8388608;
+
+
+  /*payloadArg["option"]["bufferControl"]["preBufferTime"] = 1000000000;
+  payloadArg["option"]["bufferControl"]["userBufferCtrl"] = true;
+  payloadArg["option"]["bufferControl"]["bufferingMinTime"] = 0;
+  payloadArg["option"]["bufferControl"]["bufferingMaxTime"] = 1000000000;*/
 
   payloadArgs["args"] = { payloadArg };
 
