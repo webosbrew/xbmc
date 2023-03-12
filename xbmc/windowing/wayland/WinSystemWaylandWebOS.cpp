@@ -13,6 +13,7 @@
 #include "ShellSurfaceWebOSShell.h"
 #include "cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecStarfish.h"
 #include "cores/VideoPlayer/VideoRenderers/HwDecRender/RendererStarfish.h"
+#include "cores/AudioEngine/Sinks/AESinkStarfish.h"
 #include "utils/log.h"
 
 #include <CompileInfo.h>
@@ -26,6 +27,7 @@ bool CWinSystemWaylandWebOS::InitWindowSystem()
 
   CDVDVideoCodecStarfish::Register();
   CRendererStarfish::Register();
+  CAESinkStarfish::Register();
 
   m_registry.reset(new CRegistry{*GetConnection()});
   m_registry->RequestSingleton(m_webos_foreign, 1, 2);

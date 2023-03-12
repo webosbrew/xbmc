@@ -393,7 +393,7 @@ void CSettingConditions::Initialize()
 #ifdef TARGET_ANDROID
   m_simpleConditions.emplace("has_mediacodec");
 #endif
-#ifdef WAYLANDPROTOCOLSWEBOS_FOUND
+#ifdef TARGET_WEBOS
   m_simpleConditions.emplace("has_starfish");
 #endif
 #ifdef TARGET_DARWIN
