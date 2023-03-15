@@ -275,9 +275,6 @@ bool CDVDVideoCodecStarfish::Open(CDVDStreamInfo &hints, CDVDCodecOptions &optio
     goto FAIL;
   }
 
-  dynamic_cast<KODI::WINDOWING::WAYLAND::CWinSystemWaylandWebOS*>(CServiceBroker::GetWinSystem())
-      ->SetExportedWindow(m_hints.width, m_hints.height, 1920, 1080);
-
   SetHDR();
 
   m_codecControlFlags = 0;
@@ -296,8 +293,7 @@ bool CDVDVideoCodecStarfish::Open(CDVDStreamInfo &hints, CDVDCodecOptions &optio
   // these will get reset to crop values later
   m_videobuffer.iDisplayWidth  = m_hints.width;
   m_videobuffer.iDisplayHeight = m_hints.height;
-
-  ConfigureOutputFormat();
+  m_videobuffer.stereoMode = m_hints.stereo_mode;
 
   m_opened = true;
 
@@ -456,53 +452,6 @@ CDVDVideoCodec::VCReturn CDVDVideoCodecStarfish::GetPicture(VideoPicture* pVideo
 
   return VC_PICTURE;
 
-}
-
-void CDVDVideoCodecStarfish::ConfigureOutputFormat()
-{
-  int width       = 0;
-  int height      = 0;
-  int stride      = 0;
-  int slice_height= 0;
-  int color_format= 0;
-  int crop_left   = 0;
-  int crop_top    = 0;
-  int crop_right  = 0;
-  int crop_bottom = 0;
-
-  if (!crop_right)
-    crop_right = width-1;
-  if (!crop_bottom)
-    crop_bottom = height-1;
-
-  CLog::Log(LOGDEBUG,
-            "CDVDVideoCodecStarfish:: "
-            "width({}), height({}), stride({}), slice-height({}), color-format({})",
-            width, height, stride, slice_height, color_format);
-  CLog::Log(LOGDEBUG,
-            "CDVDVideoCodecStarfish:: "
-            "crop-left({}), crop-top({}), crop-right({}), crop-bottom({})",
-            crop_left, crop_top, crop_right, crop_bottom);
-
-  CLog::Log(LOGDEBUG, "CDVDVideoCodecStarfish:: Direct Surface Rendering");
-
-  if (crop_right)
-    width = crop_right  + 1 - crop_left;
-  if (crop_bottom)
-    height = crop_bottom + 1 - crop_top;
-
-  m_videobuffer.iDisplayWidth  = m_videobuffer.iWidth  = width;
-  m_videobuffer.iDisplayHeight = m_videobuffer.iHeight = height;
-
-  if (m_hints.aspect > 1.0 && !m_hints.forced_aspect)
-  {
-    m_videobuffer.iDisplayWidth  = ((int)lrint(m_videobuffer.iHeight * m_hints.aspect)) & ~3;
-    if (m_videobuffer.iDisplayWidth > m_videobuffer.iWidth)
-    {
-      m_videobuffer.iDisplayWidth  = m_videobuffer.iWidth;
-      m_videobuffer.iDisplayHeight = ((int)lrint(m_videobuffer.iWidth / m_hints.aspect)) & ~3;
-    }
-  }
 }
 
 

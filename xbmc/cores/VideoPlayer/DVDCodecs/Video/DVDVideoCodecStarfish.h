@@ -43,6 +43,7 @@ class CStarfishVideoBuffer : public CVideoBuffer
 public:
   CStarfishVideoBuffer(int id) : CVideoBuffer(id) {}
   ~CStarfishVideoBuffer() override = default;
+  AVPixelFormat GetFormat() override { return AV_PIX_FMT_NONE; }
 
 private:
   int m_bufferId = -1;
@@ -76,7 +77,6 @@ protected:
   void SignalEndOfStream();
   void SetHDR();
   void UpdateFpsDuration();
-  void ConfigureOutputFormat();
 
   void PlayerCallback(const int32_t type, const int64_t numValue, const char *strValue);
   static void PlayerCallback(const int32_t type, const int64_t numValue, const char *strValue, void* data);

@@ -80,15 +80,19 @@ std::string CWinSystemWaylandWebOS::GetExportedWindowName()
   return m_exported_window_name;
 }
 
-bool CWinSystemWaylandWebOS::SetExportedWindow(int32_t srcWidth, int32_t srcHeight, int32_t dstWidth, int32_t dstHeight)
+bool CWinSystemWaylandWebOS::SetExportedWindow(CRect orig, CRect src, CRect dest)
 {
   if (m_webos_foreign)
   {
+    CLog::Log(LOGINFO, "CWinSystemWaylandWebOS::SetExportedWindow orig {} {} {} {} src {} {} {} {} -> dest {} {} {} {}",
+              orig.x1, orig.y1, orig.x2, orig.y2, src.x1, src.y1, src.x2, src.y2, dest.x1, dest.y1, dest.x2, dest.y2);
+    auto origRegion = GetCompositor().create_region();
     auto srcRegion = GetCompositor().create_region();
     auto dstRegion = GetCompositor().create_region();
-    srcRegion.add(0, 0, srcWidth, srcHeight);
-    dstRegion.add(0, 0, dstWidth, dstHeight);
-    m_exported_surface.set_exported_window(srcRegion, dstRegion);
+    origRegion.add(static_cast<int>(orig.x1), static_cast<int>(orig.y1), static_cast<int>(orig.Width()), static_cast<int>(orig.Height()));
+    srcRegion.add(static_cast<int>(src.x1), static_cast<int>(src.y1), static_cast<int>(src.Width()), static_cast<int>(src.Height()));
+    dstRegion.add(static_cast<int>(dest.x1), static_cast<int>(dest.y1), static_cast<int>(dest.Width()), static_cast<int>(dest.Height()));
+    m_exported_surface.set_crop_region(origRegion, srcRegion, dstRegion);
 
     return true;
   }
