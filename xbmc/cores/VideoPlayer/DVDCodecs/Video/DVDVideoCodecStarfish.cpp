@@ -115,18 +115,7 @@ bool CDVDVideoCodecStarfish::Open(CDVDStreamInfo &hints, CDVDCodecOptions &optio
     case AV_CODEC_ID_MPEG4:
       m_mime = "video/mp4v-es";
       m_formatname = "amc-mpeg4";
-      m_codecname = "MP4";
-      break;
-    case AV_CODEC_ID_H263:
-      m_mime = "video/3gpp";
-      m_formatname = "amc-h263";
-      m_codecname = "H263";
-      break;
-    case AV_CODEC_ID_VP6:
-    case AV_CODEC_ID_VP6F:
-      m_mime = "video/x-vnd.on2.vp6";
-      m_formatname = "amc-vp6";
-      m_codecname = "VP6";
+      m_codecname = "MPEG4";
       break;
     case AV_CODEC_ID_VP8:
       m_mime = "video/x-vnd.on2.vp8";
@@ -203,11 +192,6 @@ bool CDVDVideoCodecStarfish::Open(CDVDStreamInfo &hints, CDVDCodecOptions &optio
       }
     }
       break;
-    case AV_CODEC_ID_WMV3:
-      m_mime = "video/x-ms-wmv";
-      m_formatname = "amc-wmv";
-      m_codecname = "WMV";
-      break;
     case AV_CODEC_ID_VC1:
       m_mime = "video/wvc1";
       m_formatname = "amc-vc1";
@@ -222,7 +206,6 @@ bool CDVDVideoCodecStarfish::Open(CDVDStreamInfo &hints, CDVDCodecOptions &optio
       CLog::Log(LOGDEBUG, "CDVDVideoCodecStarfish::Open Unknown hints.codec({})",
                 hints.codec);
       goto FAIL;
-      break;
   }
 
   m_starfishMediaAPI->notifyForeground();
