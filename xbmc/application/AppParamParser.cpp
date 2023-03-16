@@ -57,6 +57,13 @@ void CAppParamParser::Parse(const char* const* argv, int nArgs)
 
   for (int i = 0; i < nArgs; i++)
   {
+#ifdef TARGET_WEBOS
+    // On webOS the app launcher adds a JSON as the first argument by default. These arguments do not contain
+    // useful information. So to avoid kodi trying to parse these args and misinterpret them as a video file.
+    if (i == 1)
+      continue;
+#endif
+
     args.emplace_back(argv[i]);
     if (i > 0)
       ParseArg(argv[i]);
