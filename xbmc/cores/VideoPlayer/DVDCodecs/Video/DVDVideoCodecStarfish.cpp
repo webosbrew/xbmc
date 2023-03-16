@@ -267,13 +267,11 @@ bool CDVDVideoCodecStarfish::Open(CDVDStreamInfo &hints, CDVDCodecOptions &optio
             "Open Starfish {}",
             m_codecname);
 
-  // setup a YUV420P VideoPicture buffer.
   // first make sure all properties are reset.
   m_videobuffer.Reset();
 
   m_videobuffer.iWidth  = m_hints.width;
   m_videobuffer.iHeight = m_hints.height;
-  // these will get reset to crop values later
   m_videobuffer.iDisplayWidth  = m_hints.width;
   m_videobuffer.iDisplayHeight = m_hints.height;
   m_videobuffer.stereoMode = m_hints.stereo_mode;
@@ -358,12 +356,10 @@ bool CDVDVideoCodecStarfish::AddData(const DemuxPacket &packet)
     payload["esData"] = 1;
 
     auto result = m_starfishMediaAPI->Feed(payload.dump().c_str());
-    CLog::Log(LOGDEBUG, "Result: {}", result);
     std::size_t found = result.find(std::string("Ok"));
     if (found == std::string::npos) {
       found = result.find(std::string("BufferFull"));
       if (found != std::string::npos) {
-        CLog::Log(LOGWARNING, "Buffer is full");
         return false;
       }
       CLog::Log(LOGWARNING, "Buffer submit returned error: {}", result.c_str());
@@ -429,6 +425,7 @@ CDVDVideoCodec::VCReturn CDVDVideoCodecStarfish::GetPicture(VideoPicture* pVideo
   pVideoPicture->videoBuffer = new CStarfishVideoBuffer(0);
   pVideoPicture->dts = 0;
   pVideoPicture->pts = DVD_MSEC_TO_TIME(m_starfishMediaAPI->getCurrentPlaytime() / 1000000.0);
+
   CLog::Log(LOGDEBUG, LOGVIDEO,
             "CDVDVideoCodecStarfish::GetPicture pts:{:0.4f}",
             pVideoPicture->pts);
