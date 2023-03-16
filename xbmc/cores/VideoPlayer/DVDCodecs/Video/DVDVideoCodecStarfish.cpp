@@ -45,8 +45,11 @@ constexpr unsigned int MIN_SRC_BUFFER_LEVEL = 1 * 1024 * 1024; // 1 MB
 constexpr unsigned int MAX_SRC_BUFFER_LEVEL = 8 * 1024 * 1024; // 8 MB
 } // namespace
 
+// Use this symbol to determine wether we need to use FeedLegacy or not
+static void* legacySMP __attribute__ (( weakref ("_ZN17StarfishMediaAPIs4FeedEPKc") ));
+
 CDVDVideoCodecStarfish::CDVDVideoCodecStarfish(CProcessInfo& processInfo)
-  : CDVDVideoCodec(processInfo), m_starfishMediaAPI(std::make_unique<StarfishMediaAPIs>())
+  : CDVDVideoCodec(processInfo), m_starfishMediaAPI(std::make_unique<StarfishMediaAPIs>()), m_useLegacy(&legacySMP != 0)
 {
   using namespace KODI::WINDOWING::WAYLAND;
   auto winSystem = static_cast<CWinSystemWaylandWebOS*>(CServiceBroker::GetWinSystem());
@@ -375,7 +378,7 @@ bool CDVDVideoCodecStarfish::AddData(const DemuxPacket& packet)
     std::string json;
     CJSONVariantWriter::Write(payload, json, true);
 
-    std::string result = m_starfishMediaAPI->Feed(json.c_str());
+    std::string result = m_useLegacy ? FeedLegacy(m_starfishMediaAPI.get(), json.c_str()).get() : m_starfishMediaAPI->Feed(json.c_str());
 
     if (result.find("Ok") != std::string::npos)
       return true;

@@ -74,6 +74,7 @@ public:
   // registration
   static std::unique_ptr<CDVDVideoCodec> Create(CProcessInfo& processInfo);
   static bool Register();
+  static std::unique_ptr<char[]> FeedLegacy(StarfishMediaAPIs* api, const char* payload);
 
   // required overrides
   bool Open(CDVDStreamInfo& hints, CDVDCodecOptions& options) override;
@@ -105,6 +106,7 @@ private:
   std::string m_codecname;
   std::string m_formatname{"starfish"};
   bool m_opened{false};
+  bool m_useLegacy{false};
   int m_codecControlFlags;
   std::chrono::nanoseconds m_currentPlaytime{0};
   bool m_newFrame{false};
