@@ -232,12 +232,12 @@ bool CDVDVideoCodecStarfish::Open(CDVDStreamInfo &hints, CDVDCodecOptions &optio
   payloadArg["option"]["seekMode"] = "late_Iframe";
   payloadArg["option"]["lowDelayMode"] = true;
 
-  payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["preBufferByte"] = 0;
+  /*payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["preBufferByte"] = 0;
   payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["bufferMinLevel"] = 0;
   payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["bufferMaxLevel"] = 0;
   payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["qBufferLevelVideo"] = 1048576;
   payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["srcBufferLevelVideo"]["minimum"] = 1048576;
-  payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["srcBufferLevelVideo"]["maximum"] = 8388608;
+  payloadArg["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["srcBufferLevelVideo"]["maximum"] = 8388608;*/
 
 
   /*payloadArg["option"]["bufferControl"]["preBufferTime"] = 1000000000;
