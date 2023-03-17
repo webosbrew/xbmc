@@ -290,6 +290,9 @@ bool CDVDVideoCodecStarfish::AddData(const DemuxPacket& packet)
               "current state ({})",
               dts, pts, packet.iSize, static_cast<int>(m_state));
 
+  if (dts == DVD_NOPTS_VALUE)
+    dts = 0;
+
   if (m_hints.ptsinvalid)
     pts = DVD_NOPTS_VALUE;
 
