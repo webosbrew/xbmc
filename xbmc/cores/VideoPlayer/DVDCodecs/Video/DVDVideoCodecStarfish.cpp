@@ -427,7 +427,7 @@ CDVDVideoCodec::VCReturn CDVDVideoCodecStarfish::GetPicture(VideoPicture* pVideo
   //pVideoPicture->videoBuffer = m_videobuffer.videoBuffer;
   pVideoPicture->videoBuffer = new CStarfishVideoBuffer(0);
   pVideoPicture->dts = 0;
-  pVideoPicture->pts = DVD_MSEC_TO_TIME(m_starfishMediaAPI->getCurrentPlaytime() / 1000000.0);
+  pVideoPicture->pts = DVD_MSEC_TO_TIME(m_starfishMediaAPI->getCurrentPlaytime() / 1000000);
 
   CLog::Log(LOGDEBUG, LOGVIDEO,
             "CDVDVideoCodecStarfish::GetPicture pts:{:0.4f}",
