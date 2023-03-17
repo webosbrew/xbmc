@@ -319,6 +319,9 @@ bool CDVDVideoCodecStarfish::AddData(const DemuxPacket &packet)
               "current state ({})",
               dts, pts, packet.iSize, m_state);
 
+  if (dts == DVD_NOPTS_VALUE)
+    dts = 0;
+
   if (m_hints.ptsinvalid)
     pts = DVD_NOPTS_VALUE;
 
@@ -352,7 +355,7 @@ bool CDVDVideoCodecStarfish::AddData(const DemuxPacket &packet)
     nlohmann::json payload;
     payload["bufferAddr"] = fmt::format("{}", fmt::ptr(pData));
     payload["bufferSize"] = iSize;
-    payload["pts"] = DVD_TIME_TO_MSEC(pts) * 1000000;
+    payload["pts"] = DVD_TIME_TO_MSEC(dts) * 1000000;
     payload["esData"] = 1;
 
     auto result = m_starfishMediaAPI->Feed(payload.dump().c_str());
