@@ -38,7 +38,7 @@ add_custom_target(bundle
   COMMAND ${CMAKE_COMMAND} -E copy ${DEPENDS_PATH}/lib/libwayland-cursor++.so.0 ${APP_PACKAGE_DIR}/lib
   COMMAND ${CMAKE_COMMAND} -E copy ${DEPENDS_PATH}/lib/libwayland-egl++.so.0 ${APP_PACKAGE_DIR}/lib
   COMMAND ${CMAKE_COMMAND} -E copy ${DEPENDS_PATH}/lib/libshairplay.so.0 ${APP_PACKAGE_DIR}/lib
-  COMMAND ${CMAKE_COMMAND} -E copy ${DEPENDS_PATH}/lib/libdrm.so* ${APP_PACKAGE_DIR}/lib
+  COMMAND ${CMAKE_COMMAND} -E copy ${DEPENDS_PATH}/lib/libdrm.so.2 ${APP_PACKAGE_DIR}/lib
 )
 add_dependencies(bundle ${APP_NAME_LC})
 
