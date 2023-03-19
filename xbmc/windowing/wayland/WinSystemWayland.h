@@ -44,7 +44,7 @@ namespace WAYLAND
 class CRegistry;
 class CWindowDecorator;
 
-class CWinSystemWayland : public CWinSystemBase, IInputHandler, IWindowDecorationHandler, IShellSurfaceHandler
+class CWinSystemWayland : public CWinSystemBase, IInputHandler, IWindowDecorationHandler, public IShellSurfaceHandler
 {
 public:
   CWinSystemWayland();
@@ -108,10 +108,15 @@ protected:
   {
     return m_surface;
   }
+  wayland::compositor_t GetCompositor()
+  {
+    return m_compositor;
+  }
 
   void PrepareFramePresentation();
   void FinishFramePresentation();
   virtual void SetContextSize(CSizeInt size) = 0;
+  virtual IShellSurface* CreateShellSurface(const std::string& name);
 
 private:
   // IInputHandler

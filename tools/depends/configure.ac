@@ -396,7 +396,9 @@ case $host in
     platform_ldflags="-Wl,-rpath-link=$prefix/$deps_dir/lib"
     platform_os="linux"
     meson_system="linux"
-    target_platform="wayland gbm"
+    if test "$use_platform" = "webos"; then
+      target_platform=webos
+    fi
   ;;
   *i686*-linux-gnu*|i*86*-*-linux-uclibc*|x86_64*-linux-gnu*|x86_64-*-linux-uclibc*)
     case $host in
@@ -415,7 +417,6 @@ case $host in
     platform_os="linux"
     meson_system="linux"
     ffmpeg_options_default="--enable-vaapi --enable-vdpau --cpu=$use_cpu"
-    target_platform="x11 wayland gbm"
   ;;
   *darwin*)
     # darwin builds are always cross

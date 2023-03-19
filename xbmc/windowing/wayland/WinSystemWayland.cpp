@@ -175,6 +175,7 @@ bool CWinSystemWayland::InitWindowSystem()
   m_registry->RequestSingleton(m_compositor, 1, 4);
   m_registry->RequestSingleton(m_shm, 1, 1);
   m_registry->RequestSingleton(m_presentation, 1, 1, false);
+
   // version 2 adds done() -> required
   // version 3 adds destructor -> optional
   m_registry->Request<wayland::output_t>(2, 3, std::bind(&CWinSystemWayland::OnOutputAdded, this, _1, _2), std::bind(&CWinSystemWayland::OnOutputRemoved, this, _1));
@@ -386,6 +387,25 @@ bool CWinSystemWayland::CreateNewWindow(const std::string& name,
   CWinEventsWayland::SetDisplay(&m_connection->GetDisplay());
 
   return true;
+}
+
+IShellSurface* CWinSystemWayland::CreateShellSurface(const std::string& name)
+{
+  IShellSurface* shell = CShellSurfaceXdgShell::TryCreate(*this, *m_connection, m_surface, name,
+                                                        std::string(CCompileInfo::GetAppName()));
+  if (!shell)
+  {
+    shell = CShellSurfaceXdgShellUnstableV6::TryCreate(
+        *this, *m_connection, m_surface, name, std::string(CCompileInfo::GetAppName()));
+  }
+  if (!shell)
+  {
+    CLog::LogF(LOGWARNING, "Compositor does not support xdg_shell protocol (stable or unstable v6) - falling back to wl_shell, not all features might work");
+    shell = new CShellSurfaceWlShell(*this, *m_connection, m_surface, name,
+                                                  std::string(CCompileInfo::GetAppName()));
+  }
+
+  return shell;
 }
 
 bool CWinSystemWayland::DestroyWindow()

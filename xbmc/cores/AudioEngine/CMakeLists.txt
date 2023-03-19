@@ -151,6 +151,11 @@ if(CORE_SYSTEM_NAME STREQUAL android)
   list(APPEND HEADERS Sinks/AESinkAUDIOTRACK.h)
 endif()
 
+if(WAYLANDPROTOCOLSWEBOS_FOUND)
+  list(APPEND SOURCES Sinks/AESinkStarfish.cpp)
+  list(APPEND HEADERS Sinks/AESinkStarfish.h)
+endif()
+
 if(CORE_SYSTEM_NAME STREQUAL freebsd)
   list(APPEND SOURCES Sinks/AESinkOSS.cpp)
   list(APPEND HEADERS Sinks/AESinkOSS.h)
