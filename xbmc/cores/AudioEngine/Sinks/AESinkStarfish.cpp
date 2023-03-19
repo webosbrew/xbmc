@@ -119,7 +119,7 @@ bool CAESinkStarfish::Initialize(AEAudioFormat& format, std::string& device)
       case CAEStreamInfo::STREAM_TYPE_AC3:
         payload["option"]["externalStreamingInfo"]["contents"]["codec"]["audio"] = "AC3";
         if (!format.m_streamInfo.m_ac3FrameSize)
-          format.m_streamInfo.m_ac3FrameSize = 1536;
+          format.m_streamInfo.m_ac3FrameSize = 2560;
         format.m_frames = format.m_streamInfo.m_ac3FrameSize;
         m_bufferSize = format.m_frames * 8;
         break;
@@ -131,11 +131,9 @@ bool CAESinkStarfish::Initialize(AEAudioFormat& format, std::string& device)
             static_cast<double>(m_format.m_streamInfo.m_sampleRate) / 1000;
 
         if (!format.m_streamInfo.m_ac3FrameSize)
-          format.m_streamInfo.m_ac3FrameSize = 1536;
+          format.m_streamInfo.m_ac3FrameSize = 2560;
         format.m_frames = format.m_streamInfo.m_ac3FrameSize;
         m_bufferSize = format.m_frames * 8;
-
-        //payload["option"]["externalStreamingInfo"]["contents"]["immersive"] = "ATMOS";
         break;
       default:
         return false;
@@ -219,8 +217,7 @@ unsigned int CAESinkStarfish::AddPackets(uint8_t** data, unsigned int frames, un
     frameTime = 1000000000 * frames / m_format.m_sampleRate;
 
   // on transcoded content we get 1024 + 1536 frames but we don't want to advance the pts twice
-  if (frames != 1024)
-    m_pts += frameTime;
+  m_pts += frameTime;
   CLog::Log(LOGDEBUG, "CAESinkStarfish::AddPackets payload: {}", payload.dump());
 
   auto result = m_starfishMediaAPI->Feed(payload.dump().c_str());
