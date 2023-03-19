@@ -307,6 +307,7 @@ std::string CAESinkStarfish::AEFormatToStarfishFormat(const enum AEDataFormat fo
     case AE_FMT_S32BE : return "S32BE";
     case AE_FMT_FLOAT : return "F32LE";
     case AE_FMT_DOUBLE : return "F64LE";
+    default: return "";
   }
   return "";
 }
