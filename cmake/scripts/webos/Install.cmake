@@ -32,6 +32,8 @@ add_custom_target(bundle
   COMMAND ${CMAKE_COMMAND} -E copy ${TOOLCHAIN}/${HOST}/sysroot/usr/lib/libcom_err.so.3 ${APP_PACKAGE_DIR}/lib
   # webOS 7+
   COMMAND ${CMAKE_COMMAND} -E copy ${TOOLCHAIN}/${HOST}/sysroot/lib/libcrypt.so.1 ${APP_PACKAGE_DIR}/lib
+  # for smbclient
+  COMMAND ${CMAKE_COMMAND} -E copy ${TOOLCHAIN}/${HOST}/sysroot/usr/lib/libreadline.so.8 ${APP_PACKAGE_DIR}/lib
   COMMAND ${CMAKE_COMMAND} -E copy ${DEPENDS_PATH}/lib/libwayland-client++.so.0 ${APP_PACKAGE_DIR}/lib
   COMMAND ${CMAKE_COMMAND} -E copy ${DEPENDS_PATH}/lib/libwayland-cursor++.so.0 ${APP_PACKAGE_DIR}/lib
   COMMAND ${CMAKE_COMMAND} -E copy ${DEPENDS_PATH}/lib/libwayland-egl++.so.0 ${APP_PACKAGE_DIR}/lib
