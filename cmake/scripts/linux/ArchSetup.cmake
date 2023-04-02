@@ -122,7 +122,7 @@ endif()
 
 if(KODI_DEPENDSBUILD)
   # Binaries should be directly runnable from host, so include rpath to depends
-  set(CMAKE_INSTALL_RPATH "${DEPENDS_PATH}/lib")
+  set(CMAKE_INSTALL_RPATH "${DEPENDS_PATH}/lib:$ORIGIN/lib")
   set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif()
 
