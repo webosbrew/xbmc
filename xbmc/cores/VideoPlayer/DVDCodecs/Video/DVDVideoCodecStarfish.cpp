@@ -23,12 +23,11 @@
 #include "utils/CPUInfo.h"
 #include "utils/TimeUtils.h"
 #include "utils/log.h"
+#include "utils/JSONVariantWriter.h"
 #include "windowing/wayland/WinSystemWaylandWebOS.h"
 
 #include <memory>
 #include <vector>
-
-#include <nlohmann/json.hpp>
 
 using namespace KODI::MESSAGING;
 
@@ -60,9 +59,8 @@ std::atomic<bool> CDVDVideoCodecStarfish::ms_instanceGuard(false);
 bool CDVDVideoCodecStarfish::Open(CDVDStreamInfo& hints, CDVDCodecOptions& options)
 {
   m_opened = false;
-  std::string payload;
-  auto payloadArgs = nlohmann::json();
-  auto payloadArg = nlohmann::json();
+  CVariant payloadArg;
+  CVariant payloadArgs;
 
   // allow only 1 instance here
   if (ms_instanceGuard.exchange(true))
@@ -154,7 +152,7 @@ bool CDVDVideoCodecStarfish::Open(CDVDStreamInfo& hints, CDVDCodecOptions& optio
           payloadArg["option"]["externalStreamingInfo"]["contents"]["DolbyHdrInfo"]["profileId"] =
               m_hints.dovi.dv_profile; // profile 0-9
           payloadArg["option"]["externalStreamingInfo"]["contents"]["DolbyHdrInfo"]["trackType"] =
-              m_hints.dovi.el_present_flag ? "dual" : "single"; // "single" / "dual"
+              m_hints.dovi.el_present_flag ? "dual" : "single";
         }
       }
 
@@ -224,10 +222,13 @@ bool CDVDVideoCodecStarfish::Open(CDVDStreamInfo& hints, CDVDCodecOptions& optio
   payloadArg["option"]["bufferControl"]["bufferingMinTime"] = 0;
   payloadArg["option"]["bufferControl"]["bufferingMaxTime"] = 1000000000;*/
 
-  payloadArgs["args"] = {payloadArg};
+  payloadArgs["args"] = CVariant(CVariant::VariantTypeArray);
+  payloadArgs["args"].push_back(std::move(payloadArg));
 
-  payload = payloadArgs.dump();
-  CLog::Log(LOGDEBUG, "CDVDVideoCodecStarfish: Sending Load payload {}", payload);
+  std::string payload;
+  CJSONVariantWriter::Write(payloadArgs, payload, true);
+
+  CLog::Log(LOGDEBUG, "CDVDVideoCodecStarfish: Sending Load payload {}", payload.c_str());
   if (!m_starfishMediaAPI->Load(payload.c_str(), &CDVDVideoCodecStarfish::PlayerCallback, this))
   {
     CLog::Log(LOGERROR, "CDVDVideoCodecStarfish: Load failed");
@@ -323,13 +324,16 @@ bool CDVDVideoCodecStarfish::AddData(const DemuxPacket& packet)
 
   if (pData && iSize)
   {
-    nlohmann::json payload;
+    CVariant payload;
     payload["bufferAddr"] = fmt::format("{:#x}", reinterpret_cast<std::uintptr_t>(pData));
     payload["bufferSize"] = iSize;
     payload["pts"] = DVD_TIME_TO_MSEC(dts) * 1000000;
     payload["esData"] = 1;
 
-    auto result = m_starfishMediaAPI->Feed(payload.dump().c_str());
+    std::string json;
+    CJSONVariantWriter::Write(payload, json, true);
+
+    auto result = m_starfishMediaAPI->Feed(json.c_str());
 
     if (result.find("Ok") != std::string::npos)
       return true;
@@ -440,7 +444,7 @@ void CDVDVideoCodecStarfish::SetHDR()
 {
   if (m_hints.masteringMetadata)
   {
-    auto hdrData = nlohmann::json();
+    CVariant hdrData;
 
     switch (m_hints.colorTransferCharacteristic)
     {
@@ -455,7 +459,8 @@ void CDVDVideoCodecStarfish::SetHDR()
         break;
     }
 
-    auto sei = nlohmann::json();
+    CVariant sei;
+
     // for more information, see CTA+861.3-A standard document
     constexpr double maxChromaticity = 50000;
     constexpr double maxLuminance = 10000;
@@ -487,16 +492,19 @@ void CDVDVideoCodecStarfish::SetHDR()
       sei["maxPicAverageLightLevel"] =
           static_cast<unsigned short>(m_hints.contentLightMetadata->MaxFALL);
     }
+
     hdrData["sei"] = sei;
 
-    auto vui = nlohmann::json();
+    CVariant vui;
     vui["transferCharacteristics"] = static_cast<int>(m_hints.colorTransferCharacteristic);
     vui["colorPrimaries"] = static_cast<int>(m_hints.colorPrimaries);
     vui["matrixCoeffs"] = static_cast<int>(m_hints.colorSpace);
     vui["videoFullRangeFlag"] = m_hints.colorRange == AVCOL_RANGE_JPEG;
     hdrData["vui"] = vui;
 
-    std::string payload = hdrData;
+    std::string payload;
+    CJSONVariantWriter::Write(hdrData, payload, true);
+
     CLog::Log(LOGDEBUG, "CDVDVideoCodecStarfish::SetHDR setting hdr data payload {}", payload);
     m_starfishMediaAPI->setHdrInfo(payload.c_str());
   }

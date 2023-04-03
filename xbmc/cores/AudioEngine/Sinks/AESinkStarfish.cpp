@@ -10,12 +10,11 @@
 
 #include "CompileInfo.h"
 #include "utils/log.h"
+#include "utils/JSONVariantWriter.h"
 #include "xbmc/cores/AudioEngine/AESinkFactory.h"
 
 #include <chrono>
 #include <thread>
-
-#include <nlohmann/json.hpp>
 
 void CAESinkStarfish::Register()
 {
@@ -94,7 +93,7 @@ bool CAESinkStarfish::Initialize(AEAudioFormat& format, std::string& device)
 
   format = m_format;
 
-  nlohmann::json payload;
+  CVariant payload;
   payload["isAudioOnly"] = true;
   payload["mediaTransportType"] = "BUFFERSTREAM";
   payload["option"]["appId"] = CCompileInfo::GetPackage();
@@ -170,7 +169,7 @@ bool CAESinkStarfish::Initialize(AEAudioFormat& format, std::string& device)
       CLog::Log(LOGWARNING, "CAESinkStarfish::Initialize PCM format is empty");
       return false;
     }
-    payload["option"]["externalStreamingInfo"]["contents"]["pcmInfo"]["format"] = pcmFormat;
+    payload["option"]["externalStreamingInfo"]["contents"]["pcmInfo"]["format"] = pcmFormat.data();
     payload["option"]["externalStreamingInfo"]["contents"]["codec"]["audio"] = "PCM";
   }
 
@@ -186,13 +185,16 @@ bool CAESinkStarfish::Initialize(AEAudioFormat& format, std::string& device)
   payload["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["srcBufferLevelAudio"]["maximum"] =
       m_bufferSize;
 
-  auto payloadArgs = nlohmann::json();
-  payloadArgs["args"] = {payload};
-  auto p = payloadArgs.dump();
+  CVariant payloadArgs;
+  payloadArgs["args"] = CVariant(CVariant::VariantTypeArray);
+  payloadArgs["args"].push_back(std::move(payload));
+
+  std::string json;
+  CJSONVariantWriter::Write(payloadArgs, json, true);
 
   m_starfishMediaAPI->notifyForeground();
-  CLog::Log(LOGDEBUG, "CAESinkStarfish: Sending Load payload {}", p);
-  if (!m_starfishMediaAPI->Load(p.c_str(), &CAESinkStarfish::PlayerCallback, this))
+  CLog::Log(LOGDEBUG, "CAESinkStarfish: Sending Load payload {}", json);
+  if (!m_starfishMediaAPI->Load(json.c_str(), &CAESinkStarfish::PlayerCallback, this))
   {
     CLog::Log(LOGERROR, "CAESinkStarfish::Initialize Load failed");
     return false;
@@ -223,7 +225,7 @@ unsigned int CAESinkStarfish::AddPackets(uint8_t** data, unsigned int frames, un
 {
   //CLog::Log(LOGDEBUG, "CAESinkStarfish::AddPackets frames: {} framesize: {} offset: {}",frames, m_format.m_frameSize, offset);
 
-  nlohmann::json payload;
+  CVariant payload;
   auto buffer = data[0] + offset * m_format.m_frameSize;
   payload["bufferAddr"] = fmt::format("{:#x}", reinterpret_cast<std::uintptr_t>(buffer));
   payload["bufferSize"] = frames * m_format.m_frameSize;
@@ -239,11 +241,14 @@ unsigned int CAESinkStarfish::AddPackets(uint8_t** data, unsigned int frames, un
   // on transcoded content we get 1024 + 1536 frames but we don't want to advance the pts twice
   m_pts += frameTime;
 
-  auto result = m_starfishMediaAPI->Feed(payload.dump().c_str());
+  std::string json;
+  CJSONVariantWriter::Write(payload, json, true);
+
+  auto result = m_starfishMediaAPI->Feed(json.c_str());
   while (result.find("BufferFull") != std::string::npos)
   {
     std::this_thread::sleep_for(std::chrono::nanoseconds(frameTime));
-    result = m_starfishMediaAPI->Feed(payload.dump().c_str());
+    result = m_starfishMediaAPI->Feed(json.c_str());
   }
 
   if (result.find("Ok") != std::string::npos)
