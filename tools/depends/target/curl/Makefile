@@ -7,6 +7,10 @@ CONFIGURE=cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; \
           --without-libssh2 --disable-ntlm-wb --enable-ipv6 --without-librtmp \
           --without-libidn2 --with-ca-fallback --with-ssl=$(PREFIX) --with-nghttp2=$(PREFIX)
 
+ifeq ($(TARGET_PLATFORM),webos)
+  CONFIGURE += --without-libpsl
+endif
+
 LIBDYLIB=$(PLATFORM)/lib/.libs/$(BYPRODUCT)
 
 all: .installed-$(PLATFORM)
