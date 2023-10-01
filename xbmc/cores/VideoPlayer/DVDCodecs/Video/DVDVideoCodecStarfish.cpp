@@ -29,6 +29,7 @@
 #include <vector>
 
 #include <appswitching-control-block/AcbAPI.h>
+#include <dlfcn.h>
 #include <player-factory/custompipeline.hpp>
 #include <player-factory/customplayer.hpp>
 
@@ -62,6 +63,7 @@ CDVDVideoCodecStarfish::CDVDVideoCodecStarfish(CProcessInfo& processInfo)
       }
     }
   }
+  m_hasSetHdrInfo = dlsym(RTLD_DEFAULT, "_ZN17StarfishMediaAPIs10setHdrInfoEPKc") != nullptr;
 }
 
 CDVDVideoCodecStarfish::~CDVDVideoCodecStarfish()
@@ -475,6 +477,8 @@ void CDVDVideoCodecStarfish::SetSpeed(int iSpeed)
 
 void CDVDVideoCodecStarfish::SetHDR()
 {
+  if (!m_hasSetHdrInfo)
+    return;
   if (m_hints.masteringMetadata)
   {
     CVariant hdrData;

@@ -108,6 +108,7 @@ private:
   int m_codecControlFlags;
   std::chrono::nanoseconds m_currentPlaytime{0};
   bool m_newFrame{false};
+  bool m_hasSetHdrInfo{false};
 
   StarfishState m_state{StarfishState::FLUSHED};
 
