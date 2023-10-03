@@ -19,12 +19,26 @@ using namespace std::chrono_literals;
 
 namespace
 {
-constexpr unsigned int STARFISH_AUDIO_BUFFERS = 8;
+constexpr unsigned int STARFISH_AUDIO_BUFFERS = 2;
 constexpr unsigned int AC3_SYNCFRAME_SIZE = 2560;
 
 static constexpr auto ms_audioCodecMap = make_map<CAEStreamInfo::DataType, std::string_view>({
     {CAEStreamInfo::STREAM_TYPE_AC3, "AC3"},
     {CAEStreamInfo::STREAM_TYPE_EAC3, "AC3 PLUS"},
+});
+
+static constexpr auto ms_pcmFormatMap = make_map<AEDataFormat, std::string_view>({
+    {AE_FMT_U8, "U8"},
+    {AE_FMT_S16BE, "S16BE"},
+    {AE_FMT_S16LE, "S16LE"},
+    {AE_FMT_S32BE, "S32BE"},
+    {AE_FMT_S32LE, "S32LE"},
+    {AE_FMT_S24BE4, "S24_32BE"},
+    {AE_FMT_S24LE4, "S24_32LE"},
+    {AE_FMT_S24BE3, "S24BE"},
+    {AE_FMT_S24LE3, "S24LE"},
+    {AE_FMT_FLOAT, "F32LE"},
+    {AE_FMT_DOUBLE, "F64LE"},
 });
 
 } // namespace
@@ -54,16 +68,23 @@ void CAESinkStarfish::EnumerateDevicesEx(AEDeviceInfoList& list, bool force)
   info.m_displayName = "Starfish (Passthrough only)";
   info.m_channels = AE_CH_LAYOUT_2_0;
   info.m_wantsIECPassthrough = false;
-  info.m_onlyPassthrough = true;
+  info.m_onlyPassthrough = false;
 
-  // PCM disabled for now as the latency is just too high, needs more research
-  // Thankfully, ALSA or PulseAudio do work as an alternative for PCM content
+  for (auto format = ms_pcmFormatMap.cbegin(); format != ms_pcmFormatMap.cend(); ++format)
+  {
+    info.m_dataFormats.emplace_back(format->first);
+  }
   info.m_dataFormats.emplace_back(AE_FMT_RAW);
 
   info.m_deviceType = AE_DEVTYPE_IEC958;
   info.m_streamTypes.emplace_back(CAEStreamInfo::STREAM_TYPE_AC3);
   info.m_streamTypes.emplace_back(CAEStreamInfo::STREAM_TYPE_EAC3);
 
+  info.m_sampleRates.emplace_back(8000);
+  info.m_sampleRates.emplace_back(12000);
+  info.m_sampleRates.emplace_back(16000);
+  info.m_sampleRates.emplace_back(22050);
+  info.m_sampleRates.emplace_back(24000);
   info.m_sampleRates.emplace_back(32000);
   info.m_sampleRates.emplace_back(44100);
   info.m_sampleRates.emplace_back(48000);
@@ -79,17 +100,7 @@ CAESinkStarfish::~CAESinkStarfish() = default;
 
 bool CAESinkStarfish::Initialize(AEAudioFormat& format, std::string& device)
 {
-  m_format = format;
   m_pts = 0ns;
-
-  if (m_format.m_dataFormat != AE_FMT_RAW)
-  {
-    CLog::LogF(LOGERROR, "CAESinkStarfish: Unsupported format PCM");
-    return false;
-  }
-  m_format.m_frameSize = 1;
-
-  format = m_format;
 
   CVariant payload;
   payload["isAudioOnly"] = true;
@@ -103,34 +114,57 @@ bool CAESinkStarfish::Initialize(AEAudioFormat& format, std::string& device)
   payload["option"]["externalStreamingInfo"]["contents"]["format"] = "RAW";
   payload["option"]["transmission"]["contentsType"] = "LIVE"; // "LIVE", "WEBRTC"
 
-  switch (m_format.m_streamInfo.m_type)
+  if (format.m_dataFormat == AE_FMT_RAW)
   {
-    case CAEStreamInfo::STREAM_TYPE_AC3:
-    {
-      if (!format.m_streamInfo.m_ac3FrameSize)
-        format.m_streamInfo.m_ac3FrameSize = AC3_SYNCFRAME_SIZE;
-      format.m_frames = format.m_streamInfo.m_ac3FrameSize;
-      m_bufferSize = format.m_frames * STARFISH_AUDIO_BUFFERS;
-      break;
-    }
-    case CAEStreamInfo::STREAM_TYPE_EAC3:
-    {
-      payload["option"]["externalStreamingInfo"]["contents"]["ac3PlusInfo"]["channels"] = 8;
-      payload["option"]["externalStreamingInfo"]["contents"]["ac3PlusInfo"]["frequency"] =
-          static_cast<double>(m_format.m_streamInfo.m_sampleRate) / 1000;
+    format.m_frameSize = 1;
 
-      if (!format.m_streamInfo.m_ac3FrameSize)
-        format.m_streamInfo.m_ac3FrameSize = AC3_SYNCFRAME_SIZE;
-      format.m_frames = format.m_streamInfo.m_ac3FrameSize;
-      m_bufferSize = format.m_frames * STARFISH_AUDIO_BUFFERS;
-      break;
+    switch (format.m_streamInfo.m_type)
+    {
+      case CAEStreamInfo::STREAM_TYPE_AC3:
+      {
+        if (!format.m_streamInfo.m_ac3FrameSize)
+          format.m_streamInfo.m_ac3FrameSize = AC3_SYNCFRAME_SIZE;
+        format.m_frames = format.m_streamInfo.m_ac3FrameSize;
+        m_bufferSize = format.m_frames * STARFISH_AUDIO_BUFFERS;
+        break;
+      }
+      case CAEStreamInfo::STREAM_TYPE_EAC3:
+      {
+        payload["option"]["externalStreamingInfo"]["contents"]["ac3PlusInfo"]["channels"] = 8;
+        payload["option"]["externalStreamingInfo"]["contents"]["ac3PlusInfo"]["frequency"] =
+            static_cast<double>(format.m_streamInfo.m_sampleRate) / 1000;
+
+        if (!format.m_streamInfo.m_ac3FrameSize)
+          format.m_streamInfo.m_ac3FrameSize = AC3_SYNCFRAME_SIZE;
+        format.m_frames = format.m_streamInfo.m_ac3FrameSize;
+        m_bufferSize = format.m_frames * STARFISH_AUDIO_BUFFERS;
+        break;
+      }
+      default:
+        CLog::LogF(LOGDEBUG, "CAESinkStarfish: Unsupported format {}", format.m_streamInfo.m_type);
+        return false;
     }
-    default:
-      CLog::LogF(LOGDEBUG, "CAESinkStarfish: Unsupported format {}", m_format.m_streamInfo.m_type);
-      return false;
+    payload["option"]["externalStreamingInfo"]["contents"]["codec"]["audio"] =
+        ms_audioCodecMap.at(format.m_streamInfo.m_type).data();
   }
-  payload["option"]["externalStreamingInfo"]["contents"]["codec"]["audio"] =
-      ms_audioCodecMap.at(m_format.m_streamInfo.m_type).data();
+  else // PCM
+  {
+    payload["option"]["externalStreamingInfo"]["contents"]["codec"]["audio"] = "PCM";
+
+    int bitsPerSample = CAEUtil::DataFormatToBits(format.m_dataFormat);
+    if (ms_pcmFormatMap.find(format.m_dataFormat) == ms_pcmFormatMap.cend())
+      format.m_dataFormat = AE_FMT_FLOAT;
+
+    CVariant& pcmInfo = payload["option"]["externalStreamingInfo"]["contents"]["pcmInfo"];
+    pcmInfo["format"] = ms_pcmFormatMap.find(format.m_dataFormat)->second.data();
+    pcmInfo["bitsPerSample"] = bitsPerSample;
+    pcmInfo["sampleRate"] = format.m_sampleRate / 1000.0;
+    pcmInfo["channelMode"] = "stereo";
+    pcmInfo["layout"] = AE_IS_PLANAR(format.m_dataFormat) ? "non-interleaved" : " interleaved";
+    format.m_frames = format.m_sampleRate / 20;
+    format.m_frameSize = bitsPerSample / 8 * format.m_channelLayout.Count();
+    m_bufferSize = STARFISH_AUDIO_BUFFERS * format.m_frames * format.m_frameSize;
+  }
 
   payload["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["preBufferByte"] = 0;
   payload["option"]["externalStreamingInfo"]["bufferingCtrInfo"]["bufferMinLevel"] = 0;
@@ -159,6 +193,8 @@ bool CAESinkStarfish::Initialize(AEAudioFormat& format, std::string& device)
     return false;
   }
 
+  m_format = format;
+
   return true;
 }
 
@@ -176,7 +212,7 @@ double CAESinkStarfish::GetCacheTotal()
     return STARFISH_AUDIO_BUFFERS * frameTimeSeconds.count() * 4;
   }
   else
-    return 0.0;
+    return 4.0 * STARFISH_AUDIO_BUFFERS * m_format.m_frames / m_format.m_sampleRate;
 }
 
 double CAESinkStarfish::GetLatency()
@@ -186,8 +222,13 @@ double CAESinkStarfish::GetLatency()
 
 unsigned int CAESinkStarfish::AddPackets(uint8_t** data, unsigned int frames, unsigned int offset)
 {
-  auto frameTime = std::chrono::duration_cast<std::chrono::nanoseconds>(
-      std::chrono::duration<double, std::milli>(m_format.m_streamInfo.GetDuration()));
+  std::chrono::nanoseconds frameTime;
+  if (m_format.m_dataFormat == AE_FMT_RAW)
+    frameTime = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::duration<double, std::milli>(m_format.m_streamInfo.GetDuration()));
+  else
+    frameTime = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::duration<double>(frames / m_format.m_sampleRate));
 
   std::chrono::nanoseconds pts = 0ns;
   if (!m_firstFeed && offset == 0)
