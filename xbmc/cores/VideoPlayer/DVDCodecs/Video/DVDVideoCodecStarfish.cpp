@@ -354,7 +354,9 @@ bool CDVDVideoCodecStarfish::AddData(const DemuxPacket& packet)
   {
     if (pts > 0ns)
     {
-      auto player = static_cast<mediapipeline::CustomPlayer*>(m_starfishMediaAPI->player.get());
+      auto playerAddress = reinterpret_cast<uintptr_t>(m_starfishMediaAPI.get()) + 0x38;
+      auto* playerPtr = reinterpret_cast<boost::shared_ptr<mediapipeline::Player>*>(playerAddress);
+      auto player = static_cast<mediapipeline::CustomPlayer*>(playerPtr->get());
       auto pipeline = static_cast<mediapipeline::CustomPipeline*>(player->getPipeline().get());
       MEDIA_CUSTOM_CONTENT_INFO_T contentInfo;
       pipeline->loadSpi_getInfo(&contentInfo);
